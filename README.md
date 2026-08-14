@@ -6,7 +6,7 @@ An AI-powered web application that assists TTB (Alcohol and Tobacco Tax and Trad
 
 ## Live Demo
 
-[Deployed Application URL - to be added after deployment]
+https://treasury-label-verify-1.onrender.com
 
 ## Problem Statement
 
