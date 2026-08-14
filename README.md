@@ -16,8 +16,8 @@ TTB reviews approximately 150,000 label applications per year with 47 agents. Mu
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   React         │────▶│   FastAPI        │────▶│   Google        │
-│   Frontend      │     │   Backend        │     │   Gemini Vision │
+│   React         │────▶│   FastAPI        │────▶│   OpenAI        │
+│   Frontend      │     │   Backend        │     │   GPT-4o Vision │
 │   (Simple UI)   │◀────│   (Python)       │◀────│   (OCR + NLP)   │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
          │                       │
@@ -30,7 +30,7 @@ TTB reviews approximately 150,000 label applications per year with 47 agents. Mu
 
 ### Why This Architecture:
 
-- **Separate AI service layer**: AI/OCR logic is decoupled from the web application, allowing model swapping without touching the frontend (e.g., switching from Gemini to an on-premises OCR solution for production FedRAMP compliance)
+- **Separate AI service layer**: AI/OCR logic is decoupled from the web application, allowing model swapping without touching the frontend (e.g., switching from OpenAI to an on-premises OCR solution for production FedRAMP compliance)
 - **FastAPI backend**: Async Python framework — handles concurrent requests efficiently, sub-5-second response time requirement
 - **React frontend**: Clean, accessible UI designed for users with varying technical comfort levels (ages 25-65+)
 - **Stateless design**: No sensitive data stored — images are processed and discarded (prototype security consideration)
@@ -51,7 +51,7 @@ TTB reviews approximately 150,000 label applications per year with 47 agents. Mu
 |-------|-----------|-----------|
 | Frontend | React 18 | Component-based, accessible, widely supported |
 | Backend | Python FastAPI | Async, fast, great for AI/ML workloads |
-| AI/OCR | Google Gemini Vision | Best accuracy for imperfect images (angles, glare, lighting), free tier |
+| AI/OCR | OpenAI GPT-4o Vision | Best accuracy for imperfect images (angles, glare, lighting) |
 | Styling | Tailwind CSS | Clean, responsive, accessible defaults |
 | Deployment | Render / Railway | Simple deployment, free tier available |
 
@@ -61,8 +61,7 @@ TTB reviews approximately 150,000 label applications per year with 47 agents. Mu
 
 - Node.js 18+ (frontend)
 - Python 3.10+ (backend)
-- Google Gemini API key (free tier)
-
+- OpenAI API key
 ### Backend Setup
 
 ```bash
@@ -76,7 +75,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Create .env file
-echo GEMINI_API_KEY=your-key-here > .env
+echo OPENAI_API_KEY=your-key-here > .env
 
 # Run the server
 uvicorn main:app --reload --port 8000
@@ -94,7 +93,7 @@ The app will be available at `http://localhost:5173`
 
 ## Approach and Design Decisions
 
-### AI Strategy: Gemini Vision over Traditional OCR
+### AI Strategy: GPT-4o Vision over Traditional OCR
 
 **Trade-off considered:** Traditional OCR (Tesseract) is free and runs locally, but struggles with:
 - Angled/rotated label photos
@@ -102,7 +101,7 @@ The app will be available at `http://localhost:5173`
 - Decorative/stylized fonts common on alcohol labels
 - Complex label layouts
 
-Gemini Vision handles all of these naturally because it understands visual context, not just pixel patterns.
+GPT-4o Vision handles all of these naturally because it understands visual context, not just pixel patterns.
 
 **Production consideration:** For a FedRAMP-compliant production deployment, the AI layer could be swapped to Azure AI Vision (FedRAMP authorized) or an on-premises model without changing the rest of the architecture. The AI service is deliberately isolated behind a clean API interface for this reason.
 
@@ -130,13 +129,13 @@ This follows the responsible AI principle of human-in-the-loop design: AI assist
 
 1. This is a standalone prototype — no integration with the existing COLA system
 2. No sensitive/PII data is stored (images are processed in memory and discarded)
-3. Google Gemini API is acceptable for prototype (production would use FedRAMP-authorized service)
+3. OpenAI API is acceptable for prototype (production would use FedRAMP-authorized service)
 4. Users have modern web browsers (Chrome, Edge, Firefox — last 2 versions)
 5. Single concurrent user for prototype (production would need load balancing)
 
 ## Limitations and Future Improvements
 
-- **Rate limiting**: Gemini API has rate limits (15 req/min on free tier) that would need management at scale
+- **Rate limiting**: OpenAI API has rate limits that would need management at scale
 - **Offline capability**: Current version requires internet; production could use on-premises model
 - **Batch processing**: Currently sequential; production could parallelize with worker queues
 - **Audit trail**: Prototype doesn't persist results; production would need full audit logging
